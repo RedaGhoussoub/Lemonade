@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,7 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lemonade.ui.theme.LemonadeTheme
-import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun LemonadeApp() {
     var currentStep by remember { mutableStateOf(1) }
+    var squeezeCount by remember { mutableStateOf(0) }
 
     // A surface container using the 'background' color from the theme
     Surface(
@@ -57,41 +59,65 @@ fun LemonadeApp() {
         color = MaterialTheme.colorScheme.background
     ) {
         when (currentStep) {
-            1 -> LemonadeStepScreen(step = currentStep) { currentStep = 2 }
-            2 -> LemonadeStepScreen(
-                step = currentStep,
-                maxClicks = Random.nextInt(1, 5)
-            ) { currentStep = 3 }
-
-            3 -> LemonadeStepScreen(step = currentStep) { currentStep = 4 }
-            4 -> LemonadeStepScreen(step = currentStep) { currentStep = 1 }
+            1 -> LemonTextAndImage(
+                labelResourceId = R.string.lemon_tree_label,
+                imageResourceId = R.drawable.lemon_tree,
+                imageContentResourceId = R.string.lemon_tree,
+                onImageClick = {
+                    currentStep = 2
+                    squeezeCount = (2..4).random()
+                }
+            )
+            2 -> LemonTextAndImage(
+                labelResourceId = R.string.lemon_aqueeze_label,
+                imageResourceId = R.drawable.lemon_squeeze,
+                imageContentResourceId = R.string.lemon,
+                onImageClick = {
+                    squeezeCount--
+                    if (squeezeCount == 0) {
+                        currentStep = 3
+                    }
+                }
+            )
+            3 -> LemonTextAndImage(
+                labelResourceId = R.string.lemonade_drink_label,
+                imageResourceId = R.drawable.lemon_drink,
+                imageContentResourceId = R.string.glass_lemonade,
+                onImageClick = { currentStep = 4 }
+            )
+            4 -> LemonTextAndImage(
+                labelResourceId = R.string.empty_glass_label,
+                imageResourceId = R.drawable.lemon_restart,
+                imageContentResourceId = R.string.empty_glass,
+                onImageClick = { currentStep = 1 }
+            )
         }
     }
 }
 
 @Composable
-fun LemonadeStepScreen(step: Int, maxClicks: Int = 1, onClick: () -> Unit) {
-    var clickAttempts by remember { mutableStateOf(0) }
-    val (labelResource, imageResource, imageLabel) = when (step) {
-        1 -> Triple(R.string.lemon_tree_label, R.drawable.lemon_tree, R.string.lemon_tree)
-        2 -> Triple(R.string.lemon_aqueeze_label, R.drawable.lemon_squeeze, R.string.lemon)
-        3 -> Triple(R.string.lemonade_drink_label, R.drawable.lemon_drink, R.string.glass_lemonade)
-        else -> Triple(R.string.empty_glass_label, R.drawable.lemon_restart, R.string.empty_glass)
-    }
+fun LemonTextAndImage(
+    labelResourceId: Int,
+    imageResourceId: Int,
+    imageContentResourceId: Int,
+    onImageClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = labelResource),
+            text = stringResource(id = labelResourceId),
             fontSize = 18.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
         Image(
-            painter = painterResource(id = imageResource),
-            contentDescription = stringResource(id = imageLabel),
+            painter = painterResource(id = imageResourceId),
+            contentDescription = stringResource(id = imageContentResourceId),
             modifier = Modifier
+                .wrapContentSize()
                 .border(
                     BorderStroke(
                         width = 2.dp,
@@ -99,12 +125,8 @@ fun LemonadeStepScreen(step: Int, maxClicks: Int = 1, onClick: () -> Unit) {
                     ),
                     RoundedCornerShape(4.dp)
                 )
-                .clickable {
-                    clickAttempts++
-                    if (clickAttempts == maxClicks) {
-                        onClick()
-                    }
-                }
+                .padding(16.dp)
+                .clickable(onClick = onImageClick)
         )
     }
 }
