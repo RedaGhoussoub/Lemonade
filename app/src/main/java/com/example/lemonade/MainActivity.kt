@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -91,7 +92,13 @@ fun LemonadeStepScreen(step: Int, maxClicks: Int = 1, onClick: () -> Unit) {
             painter = painterResource(id = imageResource),
             contentDescription = stringResource(id = imageLabel),
             modifier = Modifier
-                .border(BorderStroke(2.dp, Color(105, 205, 216)))
+                .border(
+                    BorderStroke(
+                        width = 2.dp,
+                        color = Color(105, 205, 216),
+                    ),
+                    RoundedCornerShape(4.dp)
+                )
                 .clickable {
                     clickAttempts++
                     if (clickAttempts == maxClicks) {
